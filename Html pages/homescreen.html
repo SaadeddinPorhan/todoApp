@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
+</head>
+<h1>HomePage</h1>
+<body>
+<p>Welcome to App.</p>
+<!-- Tab links -->
+
+<button onclick="gotoCreatePage()">Create new To-do-List</button>
+<button onclick="loadlists()">List Details</button>
+<script>
+// Store XMLHttpRequest and the JSON file location in variables
+var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+var xhr = new XMLHttpRequest();
+var url = "http://localhost:8080/users/"+id+"/todolists";
+
+// Called whenever the readyState attribute changes 
+xhr.onreadystatechange = function() {
+
+  // Check if fetch request is done
+  if (xhr.readyState == 4 && xhr.status == 200) { 
+  
+    // Parse the JSON string
+    var jsonData = JSON.parse(xhr.responseText);
+	console.log(jsonData[0].name);
+    
+    // Call the showArtists(), passing in the parsed JSON string
+    showLists(jsonData);
+  }
+};
+
+// Do the HTTP call using the url variable we specified above
+xhr.open("GET", url, true);
+xhr.send();
+
+function gotoDetails() {
+    var userid = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+    var listid = document.getElementById("text1").value;
+    var address="detailspage.html?var1="+userid+"&var2="+listid;
+    window.location.href=address;
+}
+
+function showLists(data) {
+    var output = "<ul>"; // Open list
+    var i;
+    
+    // Loop through the artists, and add them as list items
+    for (i = 0; i < data.length; i++){
+        output += "<li>" +"id:   "+ data[i].id+"    List name :   "+ data[i].name  + "</li>"; 
+    }
+    
+    output += "</ul>"; // Close list
+    document.getElementById("todoList").innerHTML = output;
+}
+
+function gotoCreatePage(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+	var address="createpage.html?myVar="+id;
+    window.location.href=address;
+}
+function controllist(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+	var deleteid=document.getElementById("text2").value;
+    var baseurl = "http://localhost:8080/users/"+id+"/todolists/"+deleteid+"/items";
+    
+    var request = new XMLHttpRequest()
+    request.open('GET', baseurl, false);
+    request.onload = function() {
+    // Begin accessing JSON data here
+
+   if(Object.keys(this.response).length<3){
+       deletelist();
+    }else {
+	   var users = JSON.parse(this.response);
+       alert("Todo List that want to delete has items.Please first delete list items !!!!");
+    }
+
+    if (this.readyState == 4 && this.status == 200) {
+    	 var res=(this.responseText);
+    } 
+    }
+    
+    request.send();
+	window.location.reload();
+    }
+function deletelist(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+	var deleteid= document.getElementById("text2").value;
+    var baseurl = "http://localhost:8080/users/"+id+"/todolists/"+deleteid;
+    var request = new XMLHttpRequest()
+    request.open('DELETE', baseurl, false);
+    request.onload = function() {
+    // Begin accessing JSON data here
+    if (this.readyState == 4 && this.status == 200) {
+    	 var res=(this.responseText);
+    } 
+    }
+    
+    request.send();
+	window.location.reload();
+    }
+
+
+function loadlists(){
+var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+7, parent.document.URL.length);
+var baseurl = "http://localhost:8080/users/"+id+"/todolists";
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET",baseurl,true);
+  xmlhttp.onreadystatechange = function() {
+    if(xmlhttp.readyState ==4 && xmlhttp.status ==200){
+      var users = JSON.parse(xmlhttp.responseText);
+      var tbltop = `<table>
+	    <tr><th>List Name</th><th>Create Date</th><th>Complete</th></tr>`;
+      //main table content we fill from data from the rest call
+      var main ="";
+      for (i = 0; i < users.length; i++){
+        main += "<tr><td>"+users[i].name+"</td><td>"+users[i].createDate+"</td><td>"+users[i].isComplete+"</td></tr>";
+      }
+      var tblbottom = "</table>";
+      var tbl = tbltop + main + tblbottom;
+      document.getElementById("userinfo").innerHTML = tbl;
+    }
+  };
+  xmlhttp.setRequestHeader("Content-type", "application/json");
+  xmlhttp.send();
+}
+
+
+</script>
+ <!-- The output appears here  -->
+<div id="todoList"></div>
+<form>
+   <input id="text1" placeholder="Enter id of list to edit">
+</form>
+</form>
+  <button type="submit" onclick="gotoDetails();">Act on List</button>
+</form>
+<form>
+   <input id="text2" placeholder="Enter id of list to delete">
+</form>
+</form>
+  <button type="submit" onclick="controllist();">Delete List</button>
+</form>
+<div id="userinfo"> </div>
+
+
+
+</body>
+</html>
+
+
+

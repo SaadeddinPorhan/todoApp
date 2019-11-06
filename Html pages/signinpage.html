@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sign In to App</title>
+</head>
+<body>
+
+<h1>Sign in</h1>
+<p>Welcome Back.</p>
+    <form>
+      <label for="lfname">Username:</label> 
+      <input id="text1" placeholder="Enter username">
+    </form>
+    <form>
+      <label for="lfname">Password:</label> 
+       <input id="text2" placeholder="Enter password">
+    </form>
+      <button type="submit" onclick="loadUsers();">Sign-In</button>
+	</form>
+</body>
+</html>
+<script>
+    
+    function loadUsers(){
+        var baseurl = "http://localhost:8080/users";
+        var uname=document.getElementById("text1").value;
+        var password = document.getElementById("text2").value;
+        baseurl = baseurl+"/x/"+uname;
+        var request = new XMLHttpRequest()
+        request.open('GET', baseurl, true)
+		request.onload = function() {
+		// Begin accessing JSON data here
+        if(!Object.keys(this.response).length){
+           alert("username is wrong");
+           return;
+       }else {
+		var users = JSON.parse(this.response)
+        }
+        if(users.password==password){
+            gotoHomePage(users.id);
+        }
+        else{
+            alert("password is wrong");
+        }
+
+		if (request.status >= 200 && request.status < 400) {
+			console.log(users)
+		} else {
+			console.log('error')
+		}
+		}
+
+		request.send()
+      }
+
+
+function gotoHomePage(id){
+    var address="homescreen.html?myVar="+id;
+    window.location.href=address;
+
+}
+</script>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<h1>List Details</h1>
+<body>
+<!-- Tab links -->
+<script>
+var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+6, parent.document.URL.indexOf('&'));
+var listid=parent.document.URL.substring(parent.document.URL.indexOf('&')+6, parent.document.URL.length);
+var xhr = new XMLHttpRequest();
+var url = "http://localhost:8080/users/"+id+"/todolists/"+listid+"/items";
+
+// Called whenever the readyState attribute changes 
+xhr.onreadystatechange = function() {
+
+  // Check if fetch request is done
+  if (xhr.readyState == 4 && xhr.status == 200) { 
+  
+    // Parse the JSON string
+    var jsonData = JSON.parse(xhr.responseText);
+	console.log(jsonData[0].name);
+    
+    // Call the showArtists(), passing in the parsed JSON string
+    showLists(jsonData);
+  }
+};
+
+// Do the HTTP call using the url variable we specified above
+xhr.open("GET", url, true);
+xhr.send();
+
+function showLists(data) {
+    var output = "<ul>"; // Open list
+    var i;
+    
+    // Loop through the artists, and add them as list items
+    for (i = 0; i < data.length; i++){
+        output += "<li>" +"id:   "+ data[i].id+"    List name :   "+ data[i].name  + "        description:   "+ data[i].description +"    deadline :   "+ data[i].deadline  +
+"    status :   "+ data[i].status  +"    createDate :   "+ data[i].createDate  +		"</li>"; 
+    }
+    output += "</ul>"; // Close list
+    document.getElementById("todoList").innerHTML = output;
+}
+function gotoCreateItem(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+6, parent.document.URL.indexOf('&'));
+    var listid=parent.document.URL.substring(parent.document.URL.indexOf('&')+6, parent.document.URL.length);
+	var address="createitem.html?var1="+id+"&var2="+listid;
+    window.location.href=address;
+}
+
+function deleteitem(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+6, parent.document.URL.indexOf('&'));
+    var listid=parent.document.URL.substring(parent.document.URL.indexOf('&')+6, parent.document.URL.length);
+	var deleteid=document.getElementById("text1").value;
+    var baseurl = "http://localhost:8080/users/"+id+"/todolists/"+listid+"/items/"+deleteid;
+    var request = new XMLHttpRequest()
+    request.open('DELETE', baseurl, false);
+    request.onload = function() {
+    // Begin accessing JSON data here
+    if (this.readyState == 4 && this.status == 200) {
+    	 var res=(this.responseText);
+    } 
+    }
+    
+    request.send();
+	window.location.reload();
+    }
+function completeitem()   {
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+6, parent.document.URL.indexOf('&'));
+    var listid=parent.document.URL.substring(parent.document.URL.indexOf('&')+6, parent.document.URL.length);
+	var compid=document.getElementById("text2").value;
+    var jsonVar ='{"id":"'+ compid + '"}';
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+             var res=(this.responseText);
+         }
+    };
+    xhttp.open("PUT", "http://localhost:8080/users/"+id+"/todolists/"+listid+"/items/"+compid, false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(jsonVar);
+	window.location.reload();
+}
+function goback(){
+    var id = parent.document.URL.substring(parent.document.URL.indexOf('?')+6, parent.document.URL.indexOf('&'));
+	var address="homescreen.html?myVar="+id;
+    window.location.href=address;
+}
+</script>
+ <!-- The output appears here  -->
+<button onclick="goback()">Back to home page</button>
+<div id="todoList"></div>
+<button onclick="gotoCreateItem()">Create new item into To-do-List</button>
+
+<form>
+   <input id="text1" placeholder="Enter id of item to delete">
+</form>
+</form>
+  <button type="submit" onclick="deleteitem();">delete item</button>
+</form>
+<form>
+   <input id="text2" placeholder="Enter id of item to completed">
+</form>
+</form>
+  <button type="submit" onclick="completeitem();">Complete item</button>
+</form>
+
+</body>
+</html>
+
+
+

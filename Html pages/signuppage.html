@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sign Up to App</title>
+</head>
+<body>
+
+<h1>Sign Up</h1>
+<p>Welcome to App.</p>
+	<form>
+      <label for="lfname">Username:</label> 
+      <input id="text1" placeholder="Enter username">
+      <br>
+	</form>
+	<form>
+      <label for="lfname">Password:</label> 
+      <input id="text2" placeholder="Enter password">
+      <br>
+    </form>
+      <button type="submit" onclick="control();">Sign-Up</button>
+	</form>
+</body>
+</html>
+
+<script>
+var exist = false;
+function UserAction()   {
+    var uname=document.getElementById("text1").value;
+    var password = document.getElementById("text2").value;
+    var jsonVar ='{"userName":"'+ uname + '","password":"'+password + '"}';
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+             var res=(this.responseText);
+         }
+    };
+    xhttp.open("POST", "http://localhost:8080/users", false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(jsonVar);
+}
+function gotoHomePage(){
+    var address="page.html";
+    window.location.href=address;
+}
+
+function buttonAct(){
+       UserAction();
+       gotoHomePage();
+}
+function control(){
+    var baseurl = "http://localhost:8080/users";
+    var uname=document.getElementById("text1").value;
+    baseurl = baseurl+"/x/"+uname;
+    var request = new XMLHttpRequest()
+    request.open('GET', baseurl, true)
+	request.onload = function() {
+	// Begin accessing JSON data here
+    if(!Object.keys(this.response).length){
+       buttonAct();
+   }else {
+	   var users = JSON.parse(this.response);
+       alert("username is taken");
+    }
+   	if (request.status >= 200 && request.status < 400) {
+		console.log(users)
+	} else {
+		console.log('error')
+	}
+	}
+
+	request.send()
+  }
+
+
+
+
+</script>
